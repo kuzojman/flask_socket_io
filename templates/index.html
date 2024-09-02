@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask App</title>
+</head>
+<body>
+    <h1>Received Number: <span id="number">{{ number }}</span></h1>
+
+    <script>
+        function fetchNumber() {
+            fetch('/get_number')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('number').textContent = data.number || 'N/A';
+                })
+                .catch(error => console.error('Error fetching number:', error));
+        }
+
+        // Опрос сервера каждые 2 секунды
+        setInterval(fetchNumber, 2000);
+
+        // Запросить данные сразу после загрузки страницы
+        fetchNumber();
+    </script>
+</body>
+</html>
