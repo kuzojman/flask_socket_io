@@ -1,28 +1,32 @@
-import socketio
+import requests
+from socketio import Client
 
-# Создаем клиента SocketIO
-sio = socketio.Client()
+sio = Client()
 
-# Добавляем обработчик событий для подключения
 @sio.event
 def connect():
     print("Connection established")
 
-# Добавляем обработчик событий для ошибок подключения
 @sio.event
 def connect_error(data):
     print("The connection failed!")
 
-# Добавляем обработчик событий для отключения
 @sio.event
 def disconnect():
     print("Disconnected from server")
 
-# Подключаемся к приложению на порту 5006
-sio.connect('http://localhost:5006')
+@sio.on("response")
+def handle_response(data):
+    if data["status"] == "Number sent to Flask app":
+        print("Number sent successfully!")
+    else:
+        print("Error:", data["error"])
 
-# Отправляем число
-sio.emit('send_number', {'number': 15634})
+response = requests.get("http://localhost:5000")
+csrf_token = response.cookies.get("csrf_token")
 
-# Закрываем соединение
+sio.connect("http://localhost:5006", headers={"Cookie": f"csrf_token={csrf_token}"})
+
+sio.emit("send_number", {"number": 19888})
+
 sio.disconnect()

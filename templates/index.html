@@ -4,25 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flask App</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
 </head>
 <body>
     <h1>Received Number: <span id="number">{{ number }}</span></h1>
-
     <script>
-        function fetchNumber() {
-            fetch('/get_number')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('number').textContent = data.number || 'N/A';
-                })
-                .catch(error => console.error('Error fetching number:', error));
-        }
-
+        const csrfToken = "{{ csrf_token() }}"; // Получение CSRF-токена из шаблона
+        const updateNumber = async () => {
+            try {
+                const response = await fetch('/get_number', { headers: { 'X-CSRFToken': csrfToken } });
+                const data = await response.json();
+                document.getElementById('number').textContent = data.number || 'N/A';
+            } catch (error) {
+                console.error('Error fetching number:', error);
+            }
+        };
+       /* const socket = new WebSocket("http://localhost:5006");
+        socket.addEventListener("message", (event) => {
+            console.log("Message from server ", event.data);
+        });
+        // Connection opened
+        socket.addEventListener("open", (event) => {
+            socket.send("Hello Server!");
+        });*/
+        const socket = io("http://localhost:5006");
+        socket.on('connect', function() {
+            //socket.emit('my event', {data: 'I\'m connected!'});
+            console.log('connected!');
+        });
+        socket.on('response', function(message) {
+            //socket.emit('my event', {data: 'I\'m connected!'});
+            console.log("Message from server ", message);
+            updateNumber();
+        });        
         // Опрос сервера каждые 2 секунды
-        setInterval(fetchNumber, 2000);
+        //setInterval(updateNumber, 2000);
 
         // Запросить данные сразу после загрузки страницы
-        fetchNumber();
+        
     </script>
 </body>
 </html>
