@@ -24,7 +24,7 @@ git clone https://github.com/your-username/flask-socketio-project.git
 ```   
 3. Установите необходимые зависимости: 
 ```text
-pip install flask flask-socketio
+pip install -r requirements.txt
 ```  
 4. Запустите Flask-приложение: 
 ```text
